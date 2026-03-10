@@ -7,6 +7,10 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+// Routes
+const authRoutes = require('./routes/auth')
+app.use('/api/auth', authRoutes)
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB Connected!'))
@@ -16,7 +20,7 @@ app.get('/', (req, res) => {
   res.send('Hospital App Backend is Running!')
 })
 
-const PORT = 5000
+const PORT = 8000
 app.listen(PORT, () => {
   console.log(`Server running on port 5000`)
 })
