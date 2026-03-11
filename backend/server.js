@@ -11,6 +11,12 @@ app.use(express.json())
 const authRoutes = require('./routes/auth')
 app.use('/api/auth', authRoutes)
 
+const doctorRoutes = require('./routes/doctors')
+const appointmentRoutes = require('./routes/appointments')
+
+app.use('/api/doctors', doctorRoutes)
+app.use('/api/appointments', appointmentRoutes)
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB Connected!'))
