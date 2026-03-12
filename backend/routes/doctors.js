@@ -25,6 +25,18 @@ router.post('/create', async (req, res) => {
   }
 })
 
+// Get doctor profile by userId (used by Doctor Dashboard on login)
+router.get('/by-user/:userId', async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ userId: req.params.userId })
+      .populate('userId', 'name email')
+    if (!doctor) return res.status(404).json({ message: 'Doctor profile not found' })
+    res.json(doctor)
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong', error })
+  }
+})
+
 // Get single doctor by id
 router.get('/:id', async (req, res) => {
   try {
