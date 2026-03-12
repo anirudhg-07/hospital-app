@@ -54,7 +54,7 @@ const LandingPage = () => {
                             </p>
                             <div className="flex flex-wrap gap-4">
                                 <Link
-                                    to="/register"
+                                    to="/login"
                                     className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 shadow-xl hover:shadow-blue-200 hover:-translate-y-1 transition-all duration-300"
                                 >
                                     Book Appointment

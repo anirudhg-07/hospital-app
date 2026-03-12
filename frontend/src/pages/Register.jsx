@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Register = () => {
     const [name, setName] = useState("");
@@ -9,6 +9,7 @@ const Register = () => {
     const [role, setRole] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -22,11 +23,12 @@ const Register = () => {
                 password,
                 role,
             });
-            setSuccessMsg("Account created successfully!");
+            setSuccessMsg("Account created! Redirecting to login...");
             setName("");
             setEmail("");
             setPassword("");
             setRole("");
+            setTimeout(() => navigate("/login"), 1500);
         } catch (err) {
             setErrorMsg(
                 err.response?.data?.message || "Something went wrong. Please try again."
