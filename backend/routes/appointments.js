@@ -1,9 +1,10 @@
 const express = require('express')
 const router = express.Router()
 const Appointment = require('../models/Appointment')
+const verifyToken = require('../middleware/auth')
 
 // Book a new appointment
-router.post('/book', async (req, res) => {
+router.post('/book', verifyToken, async (req, res) => {
   try {
     const { patientId, doctorId, date, timeSlot, reason } = req.body
 
@@ -41,7 +42,7 @@ router.post('/book', async (req, res) => {
 })
 
 // Get all appointments for a patient
-router.get('/patient/:patientId', async (req, res) => {
+router.get('/patient/:patientId', verifyToken, async (req, res) => {
   try {
     const appointments = await Appointment.find({
       patientId: req.params.patientId
@@ -53,7 +54,7 @@ router.get('/patient/:patientId', async (req, res) => {
 })
 
 // Get today's appointments for a doctor
-router.get('/doctor/:doctorId', async (req, res) => {
+router.get('/doctor/:doctorId', verifyToken, async (req, res) => {
   try {
     const today = new Date().toISOString().split('T')[0]
     const appointments = await Appointment.find({
@@ -68,7 +69,7 @@ router.get('/doctor/:doctorId', async (req, res) => {
 })
 
 // Update appointment status
-router.put('/status/:id', async (req, res) => {
+router.put('/status/:id', verifyToken, async (req, res) => {
   try {
     const { status } = req.body
     const appointment = await Appointment.findByIdAndUpdate(
@@ -83,7 +84,7 @@ router.put('/status/:id', async (req, res) => {
 })
 
 // Cancel appointment
-router.put('/cancel/:id', async (req, res) => {
+router.put('/cancel/:id', verifyToken, async (req, res) => {
   try {
     const appointment = await Appointment.findByIdAndUpdate(
       req.params.id,

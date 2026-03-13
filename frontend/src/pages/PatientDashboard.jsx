@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api";
 
 const STATUS_STYLES = {
     waiting:     { bg: "bg-yellow-100", text: "text-yellow-700", label: "Waiting" },
@@ -28,7 +28,7 @@ const PatientDashboard = () => {
     const fetchAppointments = useCallback(async (patientId) => {
         setLoadingAppts(true);
         try {
-            const res = await axios.get(`http://localhost:8000/api/appointments/patient/${patientId}`);
+            const res = await api.get(`/api/appointments/patient/${patientId}`);
             setAppointments(res.data);
         } catch {
             setAppointments([]);
@@ -46,7 +46,7 @@ const PatientDashboard = () => {
     const handleCancel = async (appointmentId) => {
         setCancellingId(appointmentId);
         try {
-            await axios.put(`http://localhost:8000/api/appointments/cancel/${appointmentId}`);
+            await api.put(`/api/appointments/cancel/${appointmentId}`);
             // Update the local state immediately for instant UI feedback
             setAppointments((prev) =>
                 prev.map((a) => a._id === appointmentId ? { ...a, status: "cancelled" } : a)

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api";
 import { useNavigate } from "react-router-dom";
 
 const STEPS = ["Choose Doctor", "Date & Time", "Confirmed!"];
@@ -38,7 +38,7 @@ const BookAppointment = () => {
     useEffect(() => {
         const fetchDoctors = async () => {
             try {
-                const res = await axios.get("http://localhost:8000/api/doctors");
+                const res = await api.get("/api/doctors");
                 setDoctors(res.data);
             } catch {
                 setDoctors([]);
@@ -57,7 +57,7 @@ const BookAppointment = () => {
         setErrorMsg("");
         setBooking(true);
         try {
-            const res = await axios.post("http://localhost:8000/api/appointments/book", {
+            const res = await api.post("/api/appointments/book", {
                 patientId: user.id,
                 doctorId: selectedDoctor._id,
                 date,

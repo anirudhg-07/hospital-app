@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api";
 
 const STATUS_STYLES = {
-    waiting:       { bg: "bg-yellow-100", text: "text-yellow-700", label: "Waiting" },
-    "in-progress": { bg: "bg-blue-100",   text: "text-blue-700",   label: "In Progress" },
-    done:          { bg: "bg-green-100",  text: "text-green-700",  label: "Done" },
-    cancelled:     { bg: "bg-red-100",    text: "text-red-600",    label: "Cancelled" },
+    waiting: { bg: "bg-yellow-100", text: "text-yellow-700", label: "Waiting" },
+    "in-progress": { bg: "bg-blue-100", text: "text-blue-700", label: "In Progress" },
+    done: { bg: "bg-green-100", text: "text-green-700", label: "Done" },
+    cancelled: { bg: "bg-red-100", text: "text-red-600", label: "Cancelled" },
 };
 
 const DoctorDashboard = () => {
@@ -33,7 +33,7 @@ const DoctorDashboard = () => {
         if (!user?.id) return;
         const fetchProfile = async () => {
             try {
-                const res = await axios.get(`http://localhost:8000/api/doctors/by-user/${user.id}`);
+                const res = await api.get(`/api/doctors/by-user/${user.id}`);
                 setDoctorProfile(res.data);
             } catch {
                 setProfileError(true);
@@ -46,7 +46,7 @@ const DoctorDashboard = () => {
     const fetchQueue = useCallback(async (doctorId) => {
         setLoadingAppts(true);
         try {
-            const res = await axios.get(`http://localhost:8000/api/appointments/doctor/${doctorId}`);
+            const res = await api.get(`/api/appointments/doctor/${doctorId}`);
             setAppointments(res.data);
         } catch {
             setAppointments([]);
@@ -65,7 +65,7 @@ const DoctorDashboard = () => {
     const handleStatusUpdate = async (appointmentId, newStatus) => {
         setUpdatingId(appointmentId);
         try {
-            await axios.put(`http://localhost:8000/api/appointments/status/${appointmentId}`, {
+            await api.put(`/api/appointments/status/${appointmentId}`, {
                 status: newStatus,
             });
             setAppointments((prev) =>
@@ -146,26 +146,34 @@ const DoctorDashboard = () => {
                 {/* Stat Cards */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
                     {[
-                        { label: "Today's Patients", value: totalToday, color: "text-[#2563EB]",  bg: "bg-blue-100",   icon: (
-                            <svg className="w-7 h-7 text-[#2563EB]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        )},
-                        { label: "Waiting",          value: pending,     color: "text-yellow-500", bg: "bg-yellow-100", icon: (
-                            <svg className="w-7 h-7 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        )},
-                        { label: "In Progress",      value: inProgress,  color: "text-blue-500",   bg: "bg-blue-50",   icon: (
-                            <svg className="w-7 h-7 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                        )},
-                        { label: "Done",             value: done,        color: "text-green-600",  bg: "bg-green-100", icon: (
-                            <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        )},
+                        {
+                            label: "Today's Patients", value: totalToday, color: "text-[#2563EB]", bg: "bg-blue-100", icon: (
+                                <svg className="w-7 h-7 text-[#2563EB]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            )
+                        },
+                        {
+                            label: "Waiting", value: pending, color: "text-yellow-500", bg: "bg-yellow-100", icon: (
+                                <svg className="w-7 h-7 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            )
+                        },
+                        {
+                            label: "In Progress", value: inProgress, color: "text-blue-500", bg: "bg-blue-50", icon: (
+                                <svg className="w-7 h-7 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                            )
+                        },
+                        {
+                            label: "Done", value: done, color: "text-green-600", bg: "bg-green-100", icon: (
+                                <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            )
+                        },
                     ].map(({ label, value, color, bg, icon }) => (
                         <div key={label} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
                             <div className="flex items-center justify-between">
@@ -220,11 +228,10 @@ const DoctorDashboard = () => {
                                 return (
                                     <div
                                         key={appt._id}
-                                        className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border gap-4 transition-all duration-200 ${
-                                            appt.status === "in-progress"
+                                        className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border gap-4 transition-all duration-200 ${appt.status === "in-progress"
                                                 ? "border-blue-200 bg-blue-50"
                                                 : "border-gray-100 bg-gray-50 hover:bg-white hover:shadow-sm"
-                                        }`}
+                                            }`}
                                     >
                                         <div className="flex items-center gap-4">
                                             {/* Token badge */}
