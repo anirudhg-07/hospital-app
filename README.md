@@ -13,7 +13,7 @@ A full-stack web application that digitizes hospital appointment booking and man
 
 | Login Page | Patient Dashboard | Doctor Dashboard |
 |---|---|---|
-| ![Login](https://github.com/user-attachments/assets/bade115b-fbc4-419a-9e2f-b7ce7120500d) | ![Patient](https://github.com/user-attachments/assets/bade115b-fbc4-419a-9e2f-b7ce7120500d) | ![Doctor](https://github.com/user-attachments/assets/bce459c1-5c75-4fc4-bd1c-16ebb5fd7519) |
+| ![Login](https://github.com/user-attachments/assets/bade115b-fbc4-419a-9e2f-b7ce7120500d) | ![Patient](https://github.com/user-attachments/assets/f92be8f9-6f66-4812-a149-8abfeef1101a) | ![Doctor](https://github.com/user-attachments/assets/bce459c1-5c75-4fc4-bd1c-16ebb5fd7519) |
 
 ---
 
