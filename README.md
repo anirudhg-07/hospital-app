@@ -4,14 +4,12 @@ A full-stack web application that digitizes hospital appointment booking and man
 
 ---
 
-<hr>
+---
 
-<h2 align="center">🌐 Live Demo</h2>
-<p align="center">
-  <a href="https://hospital-app-snowy.vercel.app/">Visit the App</a>
-</p>
+## 🌐 Live Demo  
+[Visit the App](https://hospital-app-snowy.vercel.app/)
 
-<hr>
+---
 
 ---
 
@@ -144,7 +142,7 @@ npm start
 
 **4. Open your browser**
 ```
-Frontend: http://localhost:3000
+Frontend: https://hospital-app-snowy.vercel.app/
 Backend:  http://localhost:8000
 ```
 
@@ -195,7 +193,7 @@ Backend:  http://localhost:8000
 | Phase 2 | Appointment Booking & Queue | Complete |
 | Phase 3 | Doctor Queue Management | Complete |
 | Phase 4 | Medical Records | Complete |
-| Phase 5 | Polish & Deployment | ⏳ Upcoming |
+| Phase 5 | Polish & Deployment | Complete |
 
 ---
 
