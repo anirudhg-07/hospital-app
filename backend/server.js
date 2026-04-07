@@ -4,7 +4,14 @@ const mongoose = require('mongoose')
 require('dotenv').config()
 
 const app = express()
-app.use(cors())
+
+const corsOptions = {
+  origin: 'https://hospital-app-snowy.vercel.app', // Replace with your Vercel frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+};
+
+app.use(cors(corsOptions))
 app.use(express.json())
 
 // Routes
