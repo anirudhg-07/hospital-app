@@ -5,7 +5,7 @@ A full-stack web application that digitizes hospital appointment booking and man
 ---
 
 ## 🌐 Live Demo
-> Coming soon after deployment
+https://hospital-app-snowy.vercel.app/doctor-dashboard
 
 ---
 
