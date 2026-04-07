@@ -4,8 +4,14 @@ A full-stack web application that digitizes hospital appointment booking and man
 
 ---
 
-## 🌐 Live Demo
-https://hospital-app-snowy.vercel.app/doctor-dashboard
+<hr>
+
+<h2 align="center">🌐 Live Demo</h2>
+<p align="center">
+  <a href="https://hospital-app-snowy.vercel.app/">Visit the App</a>
+</p>
+
+<hr>
 
 ---
 
