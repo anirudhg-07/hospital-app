@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 const STEPS = ["Choose Doctor", "Date & Time", "Confirmed!"];
 
@@ -39,8 +38,7 @@ const BookAppointment = () => {
     useEffect(() => {
         const fetchDoctors = async () => {
             try {
-                const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
-                const res = await axios.get(`${API_URL}/api/doctors`);
+                const res = await api.get("/api/doctors");
                 setDoctors(res.data);
             } catch {
                 setDoctors([]);
@@ -59,8 +57,7 @@ const BookAppointment = () => {
         setErrorMsg("");
         setBooking(true);
         try {
-            const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
-            const res = await axios.post(`${API_URL}/api/appointments/book`, {
+            const res = await api.post("/api/appointments/book", {
                 patientId: user.id,
                 doctorId: selectedDoctor._id,
                 date,
