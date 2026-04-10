@@ -5,13 +5,9 @@ require('dotenv').config()
 
 const app = express()
 
-const corsOptions = {
-  origin: 'https://hospital-app-snowy.vercel.app', // Vercel frontend
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true,
-};
-
-app.use(cors(corsOptions))
+app.use(cors({
+  origin: '*' // Allow all origins to prevent any Vercel domain issues
+}))
 app.use(express.json())
 
 // Routes
