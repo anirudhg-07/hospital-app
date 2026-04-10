@@ -5,7 +5,7 @@ import axios from "axios";
  * the JWT token in every request's Authorization header.
  */
 const api = axios.create({
-    baseURL: "http://localhost:8000",
+    baseURL: process.env.REACT_APP_API_URL || "http://localhost:8000",
 });
 
 // Attach token to every outgoing request
