@@ -143,7 +143,7 @@ npm start
 **4. Open your browser**
 ```
 Frontend: https://hospital-app-snowy.vercel.app/
-Backend:  http://localhost:8000
+Backend:  https://hospital-app-backend-sxdw.onrender.com
 ```
 
 ---
