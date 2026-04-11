@@ -16,7 +16,90 @@ const DoctorDashboard = () => {
     const [appointments, setAppointments] = useState([]);
     const [loadingAppts, setLoadingAppts] = useState(false);
     const [updatingId, setUpdatingId] = useState(null);
+    const [recordModalOpen, setRecordModalOpen] = useState(false);
+    const [recordSaving, setRecordSaving] = useState(false);
+    const [recordError, setRecordError] = useState("");
+    const [recordAppointment, setRecordAppointment] = useState(null);
+    const [recordForm, setRecordForm] = useState({
+        diagnosis: "",
+        symptoms: "",
+        notes: "",
+        medicines: [{ name: "", dosage: "", frequency: "", duration: "" }],
+    });
     const navigate = useNavigate();
+
+    const openRecordEditor = useCallback(async (appt) => {
+        setRecordAppointment(appt);
+        setRecordError("");
+        setRecordSaving(false);
+
+        // default empty form
+        setRecordForm({
+            diagnosis: "",
+            symptoms: "",
+            notes: "",
+            medicines: [{ name: "", dosage: "", frequency: "", duration: "" }],
+        });
+        setRecordModalOpen(true);
+
+        // try to load existing record for this appointment
+        try {
+            const res = await api.get(`/api/records/appointment/${appt._id}`);
+            const r = res.data;
+            setRecordForm({
+                diagnosis: r?.diagnosis || "",
+                symptoms: r?.symptoms || "",
+                notes: r?.notes || "",
+                medicines:
+                    Array.isArray(r?.medicines) && r.medicines.length > 0
+                        ? r.medicines.map((m) => ({
+                            name: m?.name || "",
+                            dosage: m?.dosage || "",
+                            frequency: m?.frequency || "",
+                            duration: m?.duration || "",
+                        }))
+                        : [{ name: "", dosage: "", frequency: "", duration: "" }],
+            });
+        } catch (e) {
+            // ignore: record may not exist yet (404)
+        }
+    }, []);
+
+    const closeRecordEditor = () => {
+        if (recordSaving) return;
+        setRecordModalOpen(false);
+        setRecordAppointment(null);
+        setRecordError("");
+    };
+
+    const saveRecord = async () => {
+        if (!recordAppointment?._id) return;
+        setRecordSaving(true);
+        setRecordError("");
+        try {
+            const medicines = (recordForm.medicines || [])
+                .map((m) => ({
+                    name: (m.name || "").trim(),
+                    dosage: (m.dosage || "").trim(),
+                    frequency: (m.frequency || "").trim(),
+                    duration: (m.duration || "").trim(),
+                }))
+                .filter((m) => m.name);
+
+            await api.post(`/api/records/appointment/${recordAppointment._id}`, {
+                diagnosis: recordForm.diagnosis,
+                symptoms: recordForm.symptoms,
+                notes: recordForm.notes,
+                medicines,
+            });
+            setRecordModalOpen(false);
+            setRecordAppointment(null);
+        } catch (e) {
+            setRecordError(e?.response?.data?.message || "Failed to save record");
+        } finally {
+            setRecordSaving(false);
+        }
+    };
 
     // Auth guard + load user
     useEffect(() => {
@@ -254,6 +337,12 @@ const DoctorDashboard = () => {
                                             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyle.bg} ${statusStyle.text}`}>
                                                 {statusStyle.label}
                                             </span>
+                                            <button
+                                                onClick={() => openRecordEditor(appt)}
+                                                className="px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-50 transition-all duration-200"
+                                            >
+                                                Add/Edit Record
+                                            </button>
                                             {appt.status === "waiting" && (
                                                 <button
                                                     onClick={() => handleStatusUpdate(appt._id, "in-progress")}
@@ -300,6 +389,181 @@ const DoctorDashboard = () => {
                     )}
                 </div>
             </main>
+
+            {/* Medical Record Modal */}
+            {recordModalOpen && (
+                <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
+                    <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-gray-400">Medical Record</p>
+                                <p className="text-lg font-semibold text-gray-800">
+                                    {recordAppointment?.patientId?.name || "Patient"} · Token #{recordAppointment?.tokenNumber}
+                                </p>
+                            </div>
+                            <button
+                                onClick={closeRecordEditor}
+                                className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900"
+                                disabled={recordSaving}
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            {recordError && (
+                                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+                                    {recordError}
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-xs font-semibold text-gray-500">Diagnosis</label>
+                                    <textarea
+                                        value={recordForm.diagnosis}
+                                        onChange={(e) => setRecordForm((p) => ({ ...p, diagnosis: e.target.value }))}
+                                        rows={3}
+                                        className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                        placeholder="e.g., Viral fever"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold text-gray-500">Symptoms</label>
+                                    <textarea
+                                        value={recordForm.symptoms}
+                                        onChange={(e) => setRecordForm((p) => ({ ...p, symptoms: e.target.value }))}
+                                        rows={3}
+                                        className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                        placeholder="e.g., Fever, body ache"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="text-xs font-semibold text-gray-500">Notes</label>
+                                <textarea
+                                    value={recordForm.notes}
+                                    onChange={(e) => setRecordForm((p) => ({ ...p, notes: e.target.value }))}
+                                    rows={3}
+                                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                    placeholder="Advice / follow-up"
+                                />
+                            </div>
+
+                            <div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="text-xs font-semibold text-gray-500">Medicines</label>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setRecordForm((p) => ({
+                                                ...p,
+                                                medicines: [...(p.medicines || []), { name: "", dosage: "", frequency: "", duration: "" }],
+                                            }))
+                                        }
+                                        className="text-xs font-semibold text-[#2563EB] hover:underline"
+                                    >
+                                        + Add medicine
+                                    </button>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {(recordForm.medicines || []).map((m, idx) => (
+                                        <div key={idx} className="p-3 rounded-xl bg-gray-50 border border-gray-100">
+                                            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                                                <input
+                                                    value={m.name}
+                                                    onChange={(e) =>
+                                                        setRecordForm((p) => ({
+                                                            ...p,
+                                                            medicines: (p.medicines || []).map((x, i) =>
+                                                                i === idx ? { ...x, name: e.target.value } : x
+                                                            ),
+                                                        }))
+                                                    }
+                                                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                                                    placeholder="Medicine name"
+                                                />
+                                                <input
+                                                    value={m.dosage}
+                                                    onChange={(e) =>
+                                                        setRecordForm((p) => ({
+                                                            ...p,
+                                                            medicines: (p.medicines || []).map((x, i) =>
+                                                                i === idx ? { ...x, dosage: e.target.value } : x
+                                                            ),
+                                                        }))
+                                                    }
+                                                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                                                    placeholder="Dosage"
+                                                />
+                                                <input
+                                                    value={m.frequency}
+                                                    onChange={(e) =>
+                                                        setRecordForm((p) => ({
+                                                            ...p,
+                                                            medicines: (p.medicines || []).map((x, i) =>
+                                                                i === idx ? { ...x, frequency: e.target.value } : x
+                                                            ),
+                                                        }))
+                                                    }
+                                                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                                                    placeholder="Frequency"
+                                                />
+                                                <input
+                                                    value={m.duration}
+                                                    onChange={(e) =>
+                                                        setRecordForm((p) => ({
+                                                            ...p,
+                                                            medicines: (p.medicines || []).map((x, i) =>
+                                                                i === idx ? { ...x, duration: e.target.value } : x
+                                                            ),
+                                                        }))
+                                                    }
+                                                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                                                    placeholder="Duration"
+                                                />
+                                            </div>
+                                            <div className="mt-2 flex justify-end">
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setRecordForm((p) => ({
+                                                            ...p,
+                                                            medicines: (p.medicines || []).filter((_, i) => i !== idx),
+                                                        }))
+                                                    }
+                                                    className="text-xs font-semibold text-red-500 hover:underline"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3 bg-white">
+                            <button
+                                onClick={closeRecordEditor}
+                                className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50"
+                                disabled={recordSaving}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={saveRecord}
+                                className="px-4 py-2 text-sm font-medium rounded-lg bg-[#2563EB] text-white hover:bg-[#1e3a8a] disabled:opacity-60"
+                                disabled={recordSaving}
+                            >
+                                {recordSaving ? "Saving…" : "Save Record"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
