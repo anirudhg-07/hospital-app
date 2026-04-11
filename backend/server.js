@@ -16,9 +16,11 @@ app.use('/api/auth', authRoutes)
 
 const doctorRoutes = require('./routes/doctors')
 const appointmentRoutes = require('./routes/appointments')
+const recordRoutes = require('./routes/records')
 
 app.use('/api/doctors', doctorRoutes)
 app.use('/api/appointments', appointmentRoutes)
+app.use('/api/records', recordRoutes)
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)

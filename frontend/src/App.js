@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import PatientDashboard from "./pages/PatientDashboard";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import BookAppointment from "./pages/BookAppointment";
+import MyRecords from "./pages/MyRecords";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <Route path="/patient-dashboard" element={<ProtectedRoute role="patient"><PatientDashboard /></ProtectedRoute>} />
         <Route path="/doctor-dashboard"  element={<ProtectedRoute role="doctor"><DoctorDashboard /></ProtectedRoute>} />
         <Route path="/book-appointment"  element={<ProtectedRoute role="patient"><BookAppointment /></ProtectedRoute>} />
+  <Route path="/my-records"  element={<ProtectedRoute role="patient"><MyRecords /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );

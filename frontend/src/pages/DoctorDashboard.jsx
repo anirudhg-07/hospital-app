@@ -33,8 +33,7 @@ const DoctorDashboard = () => {
         if (!user?.id) return;
         const fetchProfile = async () => {
             try {
-                const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
-                const res = await api.get(`${API_URL}/api/doctors/by-user/${user.id}`);
+                const res = await api.get(`/api/doctors/by-user/${user.id}`);
                 setDoctorProfile(res.data);
             } catch {
                 setProfileError(true);
@@ -47,8 +46,7 @@ const DoctorDashboard = () => {
     const fetchQueue = useCallback(async (doctorId) => {
         setLoadingAppts(true);
         try {
-            const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
-            const res = await api.get(`${API_URL}/api/appointments/doctor/${doctorId}`);
+            const res = await api.get(`/api/appointments/doctor/${doctorId}`);
             setAppointments(res.data);
         } catch {
             setAppointments([]);
@@ -67,8 +65,7 @@ const DoctorDashboard = () => {
     const handleStatusUpdate = async (appointmentId, newStatus) => {
         setUpdatingId(appointmentId);
         try {
-            const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
-            await api.put(`${API_URL}/api/appointments/status/${appointmentId}`, {
+            await api.put(`/api/appointments/status/${appointmentId}`, {
                 status: newStatus,
             });
             setAppointments((prev) =>
