@@ -92,10 +92,11 @@ router.get('/patient/:patientId', verifyToken, async (req, res) => {
   try {
     const { patientId } = req.params
 
-    if (req.user?.role !== 'patient') {
-      return res.status(403).json({ message: 'Only patients can access this endpoint' })
-    }
-    if (String(patientId) !== String(req.user.userId)) {
+    // Allow if patient is requesting their own records, or if user is a doctor
+    if (
+      (req.user?.role === 'patient' && String(patientId) !== String(req.user.userId))
+      || (req.user?.role !== 'patient' && req.user?.role !== 'doctor')
+    ) {
       return res.status(403).json({ message: 'Forbidden' })
     }
 
