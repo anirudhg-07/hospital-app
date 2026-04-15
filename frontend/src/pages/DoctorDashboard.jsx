@@ -26,6 +26,8 @@ const DoctorDashboard = () => {
         notes: "",
         medicines: [{ name: "", dosage: "", frequency: "", duration: "" }],
     });
+    // For previous records modal
+    const [prevRecordsModal, setPrevRecordsModal] = useState({ open: false, loading: false, records: [], error: "", patientName: "" });
     const navigate = useNavigate();
 
     const openRecordEditor = useCallback(async (appt) => {
@@ -64,6 +66,26 @@ const DoctorDashboard = () => {
             // ignore: record may not exist yet (404)
         }
     }, []);
+
+    // Show previous records modal for a patient (last 3, any doctor)
+    const showPrevRecords = async (appt) => {
+        setPrevRecordsModal({ open: true, loading: true, records: [], error: "", patientName: appt.patientId?.name || "Patient" });
+        try {
+            const res = await api.get(`/api/records/patient/${appt.patientId?._id || appt.patientId}`);
+            let records = Array.isArray(res.data) ? res.data : [];
+            // Exclude current appointment's record (if any)
+            records = records.filter(r => String(r.appointmentId?._id || r.appointmentId) !== String(appt._id));
+            // Only records before this appointment's date
+            const apptDate = new Date(appt.date);
+            records = records.filter(r => new Date(r.appointmentId?.date || r.createdAt) < apptDate);
+            // Sort by date descending, take last 3
+            records.sort((a, b) => new Date(b.appointmentId?.date || b.createdAt) - new Date(a.appointmentId?.date || a.createdAt));
+            records = records.slice(0, 3);
+            setPrevRecordsModal((p) => ({ ...p, loading: false, records }));
+        } catch (e) {
+            setPrevRecordsModal((p) => ({ ...p, loading: false, error: e?.response?.data?.message || "Failed to load records" }));
+        }
+    };
 
     const closeRecordEditor = () => {
         if (recordSaving) return;
@@ -344,13 +366,21 @@ const DoctorDashboard = () => {
                                                 Add/Edit Record
                                             </button>
                                             {appt.status === "waiting" && (
-                                                <button
-                                                    onClick={() => handleStatusUpdate(appt._id, "in-progress")}
-                                                    disabled={isUpdating}
-                                                    className="px-3 py-1.5 bg-[#2563EB] text-white text-xs font-medium rounded-lg hover:bg-[#1e3a8a] disabled:opacity-50 transition-all duration-200"
-                                                >
-                                                    {isUpdating ? "..." : "Call In"}
-                                                </button>
+                                                <>
+                                                    <button
+                                                        onClick={() => showPrevRecords(appt)}
+                                                        className="px-3 py-1.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-lg border border-yellow-200 hover:bg-yellow-200 transition-all duration-200 mr-1"
+                                                    >
+                                                        View Previous Records
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleStatusUpdate(appt._id, "in-progress")}
+                                                        disabled={isUpdating}
+                                                        className="px-3 py-1.5 bg-[#2563EB] text-white text-xs font-medium rounded-lg hover:bg-[#1e3a8a] disabled:opacity-50 transition-all duration-200"
+                                                    >
+                                                        {isUpdating ? "..." : "Call In"}
+                                                    </button>
+                                                </>
                                             )}
                                             {appt.status === "in-progress" && (
                                                 <button
@@ -362,6 +392,113 @@ const DoctorDashboard = () => {
                                                 </button>
                                             )}
                                         </div>
+            {/* Previous Records Modal */}
+            {prevRecordsModal.open && (
+                <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
+                    <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-gray-400">Previous Records</p>
+                                <p className="text-lg font-semibold text-gray-800">
+                                    {prevRecordsModal.patientName}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setPrevRecordsModal((p) => ({ ...p, open: false }))}
+                                className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            {prevRecordsModal.loading ? (
+                                <div className="flex items-center justify-center py-10 gap-3">
+                                    <div className="w-6 h-6 border-4 border-[#2563EB] border-t-transparent rounded-full animate-spin" />
+                                    <p className="text-gray-400 text-sm">Loading records...</p>
+                                </div>
+                            ) : prevRecordsModal.error ? (
+                                <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                                    <p className="text-red-700 font-semibold">{prevRecordsModal.error}</p>
+                                </div>
+                            ) : prevRecordsModal.records.length === 0 ? (
+                                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+                                    <p className="text-gray-500 font-medium">No previous records found</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-6">
+                                    {prevRecordsModal.records.map((r, idx) => (
+                                        <div key={r._id || idx} className="bg-gray-50 rounded-xl border border-gray-100 p-4">
+                                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
+                                                <div>
+                                                    <p className="text-xs text-gray-400">Doctor</p>
+                                                    <p className="text-base font-semibold text-gray-800">
+                                                        {r.doctorId?.userId?.name || "Doctor"}
+                                                        {r.doctorId?.specialization ? (
+                                                            <span className="ml-2 text-xs font-medium text-blue-500">· {r.doctorId.specialization}</span>
+                                                        ) : null}
+                                                    </p>
+                                                </div>
+                                                <div className="text-xs text-gray-500">
+                                                    {new Date(r.createdAt).toLocaleString("en-IN", {
+                                                        year: "numeric",
+                                                        month: "short",
+                                                        day: "numeric",
+                                                        hour: "2-digit",
+                                                        minute: "2-digit",
+                                                    })}
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+                                                <div className="p-2 rounded-xl bg-white border border-gray-100">
+                                                    <p className="text-xs font-semibold text-gray-500">Diagnosis</p>
+                                                    <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{r.diagnosis || "—"}</p>
+                                                </div>
+                                                <div className="p-2 rounded-xl bg-white border border-gray-100">
+                                                    <p className="text-xs font-semibold text-gray-500">Symptoms</p>
+                                                    <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{r.symptoms || "—"}</p>
+                                                </div>
+                                            </div>
+                                            <div className="p-2 rounded-xl bg-white border border-gray-100 mb-2">
+                                                <p className="text-xs font-semibold text-gray-500">Notes</p>
+                                                <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{r.notes || "—"}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-semibold text-gray-500 mb-1">Medicines</p>
+                                                {Array.isArray(r.medicines) && r.medicines.length > 0 ? (
+                                                    <div className="overflow-x-auto">
+                                                        <table className="min-w-full text-xs">
+                                                            <thead>
+                                                                <tr className="text-left text-gray-500">
+                                                                    <th className="py-1 pr-2">Name</th>
+                                                                    <th className="py-1 pr-2">Dosage</th>
+                                                                    <th className="py-1 pr-2">Frequency</th>
+                                                                    <th className="py-1 pr-2">Duration</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {r.medicines.map((m, midx) => (
+                                                                    <tr key={midx} className="border-t border-gray-100">
+                                                                        <td className="py-1 pr-2 font-medium text-gray-800">{m.name}</td>
+                                                                        <td className="py-1 pr-2 text-gray-600">{m.dosage || "—"}</td>
+                                                                        <td className="py-1 pr-2 text-gray-600">{m.frequency || "—"}</td>
+                                                                        <td className="py-1 pr-2 text-gray-600">{m.duration || "—"}</td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-xs text-gray-400">—</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
                                     </div>
                                 );
                             })}
