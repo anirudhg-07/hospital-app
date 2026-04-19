@@ -14,7 +14,11 @@ const PatientDashboard = () => {
     const [appointments, setAppointments] = useState([]);
     const [loadingAppts, setLoadingAppts] = useState(true);
     const [cancellingId, setCancellingId] = useState(null);
+    const [detailsModal, setDetailsModal] = useState({ open: false, appt: null });
     const navigate = useNavigate();
+
+    const openDetails = (appt) => setDetailsModal({ open: true, appt });
+    const closeDetails = () => setDetailsModal({ open: false, appt: null });
 
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
@@ -162,7 +166,11 @@ const PatientDashboard = () => {
                             {activeAppointments.map((appt) => {
                                 const statusStyle = STATUS_STYLES[appt.status] || STATUS_STYLES.waiting;
                                 return (
-                                    <div key={appt._id} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-sm transition-all duration-200">
+                                    <div
+                                        key={appt._id}
+                                        onClick={() => openDetails(appt)}
+                                        className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-sm transition-all duration-200 cursor-pointer"
+                                    >
                                         <div className="flex items-center gap-4">
                                             {/* Token badge */}
                                             <div className="w-12 h-12 bg-[#2563EB] rounded-xl flex flex-col items-center justify-center flex-shrink-0">
@@ -187,7 +195,10 @@ const PatientDashboard = () => {
                                             </span>
                                             {appt.status === "waiting" && (
                                                 <button
-                                                    onClick={() => handleCancel(appt._id)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleCancel(appt._id);
+                                                    }}
                                                     disabled={cancellingId === appt._id}
                                                     className="px-3 py-1.5 text-xs font-medium text-red-500 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50 transition-all duration-200"
                                                 >
@@ -201,6 +212,101 @@ const PatientDashboard = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Appointment Details Modal */}
+                {detailsModal.open && detailsModal.appt && (() => {
+                    const appt = detailsModal.appt;
+                    const statusStyle = STATUS_STYLES[appt.status] || STATUS_STYLES.waiting;
+                    const doctorName = appt.doctorId?.name || appt.doctorId?.userId?.name || "Unknown";
+                    const specialization = appt.doctorId?.specialization;
+                    const fees = appt.doctorId?.fees;
+
+                    return (
+                        <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
+                            <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-400">Appointment Details</p>
+                                        <p className="text-lg font-semibold text-gray-800">Token #{appt.tokenNumber}</p>
+                                    </div>
+                                    <button
+                                        onClick={closeDetails}
+                                        className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                <div className="p-6 space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-xs font-semibold text-gray-500">Doctor</p>
+                                            <p className="text-lg font-semibold text-gray-800">
+                                                Dr. {doctorName}
+                                                {specialization ? (
+                                                    <span className="ml-2 text-sm font-medium text-blue-500">· {specialization}</span>
+                                                ) : null}
+                                            </p>
+                                        </div>
+                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyle.bg} ${statusStyle.text}`}>
+                                            {statusStyle.label}
+                                        </span>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                            <p className="text-xs font-semibold text-gray-500">Date</p>
+                                            <p className="text-sm text-gray-700 mt-1">{appt.date}</p>
+                                        </div>
+                                        <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                            <p className="text-xs font-semibold text-gray-500">Time Slot</p>
+                                            <p className="text-sm text-gray-700 mt-1">{appt.timeSlot}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                            <p className="text-xs font-semibold text-gray-500">Appointment ID</p>
+                                            <p className="text-sm text-gray-700 mt-1 break-all">{appt._id}</p>
+                                        </div>
+                                        <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                            <p className="text-xs font-semibold text-gray-500">Fees</p>
+                                            <p className="text-sm text-gray-700 mt-1">{typeof fees === "number" ? `₹${fees}` : "—"}</p>
+                                        </div>
+                                    </div>
+
+                                    {appt.reason && (
+                                        <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                            <p className="text-xs font-semibold text-gray-500">Reason</p>
+                                            <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{appt.reason}</p>
+                                        </div>
+                                    )}
+
+                                    <div className="flex items-center justify-end gap-3 pt-2">
+                                        <button
+                                            onClick={closeDetails}
+                                            className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50"
+                                        >
+                                            Close
+                                        </button>
+                                        {appt.status === "waiting" && (
+                                            <button
+                                                onClick={() => {
+                                                    closeDetails();
+                                                    handleCancel(appt._id);
+                                                }}
+                                                disabled={cancellingId === appt._id}
+                                                className="px-4 py-2 text-sm font-medium rounded-lg border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-60"
+                                            >
+                                                {cancellingId === appt._id ? "Cancelling…" : "Cancel Appointment"}
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })()}
 
                 {/* Past Appointments */}
                 {pastAppointments.length > 0 && (
