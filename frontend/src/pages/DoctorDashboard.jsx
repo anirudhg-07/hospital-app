@@ -28,7 +28,11 @@ const DoctorDashboard = () => {
     });
     // For previous records modal
     const [prevRecordsModal, setPrevRecordsModal] = useState({ open: false, loading: false, records: [], error: "", patientName: "" });
+    const [apptDetailsModal, setApptDetailsModal] = useState({ open: false, appt: null });
     const navigate = useNavigate();
+
+    const openApptDetails = (appt) => setApptDetailsModal({ open: true, appt });
+    const closeApptDetails = () => setApptDetailsModal({ open: false, appt: null });
 
     const openRecordEditor = useCallback(async (appt) => {
         setRecordAppointment(appt);
@@ -75,10 +79,7 @@ const DoctorDashboard = () => {
             let records = Array.isArray(res.data) ? res.data : [];
             // Exclude current appointment's record (if any)
             records = records.filter(r => String(r.appointmentId?._id || r.appointmentId) !== String(appt._id));
-            // Only records before this appointment's date
-            const apptDate = new Date(appt.date);
-            records = records.filter(r => new Date(r.appointmentId?.date || r.createdAt) < apptDate);
-            // Sort by date descending, take last 3
+            // TEMP: Do not filter by date, just show last 3 records (for debugging)
             records.sort((a, b) => new Date(b.appointmentId?.date || b.createdAt) - new Date(a.appointmentId?.date || a.createdAt));
             records = records.slice(0, 3);
             setPrevRecordsModal((p) => ({ ...p, loading: false, records }));
@@ -511,7 +512,11 @@ const DoctorDashboard = () => {
                             <p className="text-sm font-medium text-gray-400 mb-3">Completed Today ({done})</p>
                             <div className="space-y-2">
                                 {appointments.filter((a) => a.status === "done").map((appt) => (
-                                    <div key={appt._id} className="flex items-center justify-between px-4 py-3 rounded-xl bg-green-50 border border-green-100 opacity-70">
+                                    <div
+                                        key={appt._id}
+                                        onClick={() => openApptDetails(appt)}
+                                        className="flex items-center justify-between px-4 py-3 rounded-xl bg-green-50 border border-green-100 opacity-80 hover:opacity-100 hover:shadow-sm cursor-pointer transition-all duration-200"
+                                    >
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 bg-green-400 rounded-lg flex items-center justify-center">
                                                 <span className="text-white text-xs font-bold">#{appt.tokenNumber}</span>
@@ -526,6 +531,82 @@ const DoctorDashboard = () => {
                     )}
                 </div>
             </main>
+
+            {/* Appointment Details Modal (Doctor Portal) */}
+            {apptDetailsModal.open && apptDetailsModal.appt && (() => {
+                const appt = apptDetailsModal.appt;
+                const statusStyle = STATUS_STYLES[appt.status] || STATUS_STYLES.waiting;
+                const patientName = appt.patientId?.name || "Unknown Patient";
+
+                return (
+                    <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
+                        <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-400">Appointment Details</p>
+                                    <p className="text-lg font-semibold text-gray-800">Token #{appt.tokenNumber}</p>
+                                </div>
+                                <button
+                                    onClick={closeApptDetails}
+                                    className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+
+                            <div className="p-6 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs font-semibold text-gray-500">Patient</p>
+                                        <p className="text-lg font-semibold text-gray-800">{patientName}</p>
+                                    </div>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyle.bg} ${statusStyle.text}`}>
+                                        {statusStyle.label}
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                        <p className="text-xs font-semibold text-gray-500">Date</p>
+                                        <p className="text-sm text-gray-700 mt-1">{appt.date}</p>
+                                    </div>
+                                    <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                        <p className="text-xs font-semibold text-gray-500">Time Slot</p>
+                                        <p className="text-sm text-gray-700 mt-1">{appt.timeSlot}</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                        <p className="text-xs font-semibold text-gray-500">Appointment ID</p>
+                                        <p className="text-sm text-gray-700 mt-1 break-all">{appt._id}</p>
+                                    </div>
+                                    <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                        <p className="text-xs font-semibold text-gray-500">Doctor</p>
+                                        <p className="text-sm text-gray-700 mt-1">Dr. {user?.name || "—"}</p>
+                                    </div>
+                                </div>
+
+                                {appt.reason && (
+                                    <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+                                        <p className="text-xs font-semibold text-gray-500">Reason</p>
+                                        <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{appt.reason}</p>
+                                    </div>
+                                )}
+
+                                <div className="flex items-center justify-end gap-3 pt-2">
+                                    <button
+                                        onClick={closeApptDetails}
+                                        className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50"
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
 
             {/* Medical Record Modal */}
             {recordModalOpen && (
