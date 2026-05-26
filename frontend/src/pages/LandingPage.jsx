@@ -361,26 +361,22 @@ const LandingPage = () => {
                                 {
                                     name: "G Anirudh",
                                     regNo: "RA2411003010020",
-                                    email: "ag1681@srmist.edu.in",
-                                    mobile: "+91 9042203819"
+                                    email: "ag1681@srmist.edu.in"
                                 },
                                 {
                                     name: "J Aakash",
                                     regNo: "RA2411003010009",
-                                    email: "ja0735@srmist.edu.in",
-                                    mobile: "+91 9363905541"
+                                    email: "ja0735@srmist.edu.in"
                                 },
                                 {
                                     name: "Akshalin",
                                     regNo: "RA2411003010052",
-                                    email: "ac9696@srmist.edu.in",
-                                    mobile: "+91 7806951901"
+                                    email: "ac9696@srmist.edu.in"
                                 },
                                 {
                                     name: "Pratheep",
                                     regNo: "RA2411003010053",
-                                    email: "pr6084@srmist.edu.in",
-                                    mobile: "+91 9500046195"
+                                    email: "pr6084@srmist.edu.in"
                                 }
                             ].map((student, index) => (
                                 <div key={index} className="bg-gray-50 rounded-3xl p-8 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 hover:border-blue-100 group">
@@ -397,10 +393,6 @@ const LandingPage = () => {
                                         <div className="flex items-center gap-3 text-gray-600">
                                             <span className="text-lg">✉️</span>
                                             <a href={`mailto:${student.email}`} className="hover:text-blue-600 transition-colors text-sm font-medium">{student.email}</a>
-                                        </div>
-                                        <div className="flex items-center gap-3 text-gray-600">
-                                            <span className="text-lg">📱</span>
-                                            <a href={`tel:${student.mobile}`} className="hover:text-blue-600 transition-colors text-sm font-medium">{student.mobile}</a>
                                         </div>
                                     </div>
                                 </div>
