@@ -267,66 +267,150 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* SECTION 7 - Location Section */}
+            {/* SECTION 7 - About Us Title + Location Section */}
             <section className="py-24 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="bg-white rounded-[3rem] overflow-hidden shadow-xl border border-gray-100 flex flex-col lg:flex-row">
-                        <div className="lg:w-1/2 p-12 lg:p-20 space-y-8">
-                            <div className="inline-block px-4 py-1.5 bg-green-50 text-green-600 rounded-full text-sm font-semibold border border-green-100">
-                                Our Location 📍
-                            </div>
-                            <h2 className="text-4xl font-bold text-gray-900">Visit Us at SRM Hospital</h2>
-                            <p className="text-lg text-gray-600">
-                                SRM Hospital, Kattankulathur is equipped with state-of-the-art facilities and a dedicated team of healthcare professionals.
-                            </p>
-                            <div className="space-y-4">
-                                <div className="flex items-start gap-4">
-                                    <span className="text-2xl">🏢</span>
-                                    <div>
-                                        <p className="font-bold text-gray-900">Address</p>
-                                        <p className="text-gray-600">Potheri, SRM Nagar, Kattankulathur, Tamil Nadu 603203</p>
-                                    </div>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-16">
+                    <h2 className="text-4xl font-bold text-gray-900 mb-4">About Us</h2>
+                    <p className="text-gray-600 max-w-2xl mx-auto">
+                        Learn more about HospitalApp, our location, and how to get in touch with our team.
+                    </p>
+                </div>
+                <section className="pb-24 bg-gray-50">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="bg-white rounded-[3rem] overflow-hidden shadow-xl border border-gray-100 flex flex-col lg:flex-row">
+                            <div className="lg:w-1/2 p-12 lg:p-20 space-y-8">
+                                <div className="inline-block px-4 py-1.5 bg-green-50 text-green-600 rounded-full text-sm font-semibold border border-green-100">
+                                    Our Location 📍
                                 </div>
-                                <div className="flex items-start gap-4">
-                                    <span className="text-2xl">📞</span>
-                                    <div>
-                                        <p className="font-bold text-gray-900">Emergency Contact</p>
-                                        <p className="text-gray-600">+91 44 2741 7000</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <a
-                                href="https://www.google.com/maps/search/SRM+hospital+Kattankulathur"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-all duration-300 shadow-xl"
-                            >
-                                Get Directions ↗️
-                            </a>
-                        </div>
-                        <div className="lg:w-1/2 bg-blue-100 relative min-h-[400px] flex items-center justify-center overflow-hidden">
-                            {/* Decorative Map Illustration */}
-                            <div className="absolute inset-0 opacity-20">
-                                <div className="grid grid-cols-10 grid-rows-10 h-full w-full">
-                                    {[...Array(100)].map((_, i) => (
-                                        <div key={i} className="border border-blue-600/10"></div>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="relative z-10 text-center">
-                                <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center text-3xl text-white shadow-2xl animate-bounce mb-4 mx-auto">
-                                    📍
-                                </div>
-                                <p className="text-blue-900 font-bold bg-white/80 backdrop-blur-md px-6 py-2 rounded-full shadow-lg">
-                                    Kattankulathur, Chennai
+                                <h2 className="text-4xl font-bold text-gray-900">Visit Us at SRM Hospital</h2>
+                                <p className="text-lg text-gray-600">
+                                    SRM Hospital, Kattankulathur is equipped with state-of-the-art facilities and a dedicated team of healthcare professionals.
                                 </p>
+                                <div className="space-y-4">
+                                    <div className="flex items-start gap-4">
+                                        <span className="text-2xl">🏢</span>
+                                        <div>
+                                            <p className="font-bold text-gray-900">Address</p>
+                                            <p className="text-gray-600">Potheri, SRM Nagar, Kattankulathur, Tamil Nadu 603203</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-4">
+                                        <span className="text-2xl">📞</span>
+                                        <div>
+                                            <p className="font-bold text-gray-900">Emergency Contact</p>
+                                            <p className="text-gray-600">+91 44 2741 7000</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <a
+                                    href="https://www.google.com/maps/search/SRM+hospital+Kattankulathur"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-all duration-300 shadow-xl"
+                                >
+                                    Get Directions ↗️
+                                </a>
                             </div>
+                            <div className="lg:w-1/2 bg-blue-100 relative min-h-[400px] flex items-center justify-center overflow-hidden">
+                                {/* Decorative Map Illustration */}
+                                <div className="absolute inset-0 opacity-20">
+                                    <div className="grid grid-cols-10 grid-rows-10 h-full w-full">
+                                        {[...Array(100)].map((_, i) => (
+                                            <div key={i} className="border border-blue-600/10"></div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="relative z-10 text-center">
+                                    <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center text-3xl text-white shadow-2xl animate-bounce mb-4 mx-auto">
+                                        📍
+                                    </div>
+                                    <p className="text-blue-900 font-bold bg-white/80 backdrop-blur-md px-6 py-2 rounded-full shadow-lg">
+                                        Kattankulathur, Chennai
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            {/* SECTION 8 - Contact Us */}
+            <section className="py-24 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl font-bold text-gray-900 mb-4">Contact Us</h2>
+                        <p className="text-gray-600 max-w-2xl mx-auto">
+                            Reach out to our faculty mentor or student team for any queries or collaboration.
+                        </p>
+                    </div>
+
+                    {/* Faculty Mentor */}
+                    <div className="max-w-4xl mx-auto mb-12">
+                        <div className="bg-gradient-to-r from-blue-600 to-blue-400 rounded-3xl p-8 text-white text-center shadow-xl">
+                            <div className="text-4xl mb-3">🎓</div>
+                            <h3 className="text-2xl font-bold mb-1">Faculty Mentor</h3>
+                            <p className="text-blue-100 text-xl font-semibold">Dr. S. Padmini</p>
+                        </div>
+                    </div>
+
+                    {/* Students Team */}
+                    <div className="max-w-4xl mx-auto">
+                        <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Students Team</h3>
+                        <div className="grid md:grid-cols-2 gap-6">
+                            {[
+                                {
+                                    name: "G Anirudh",
+                                    regNo: "RA2411003010020",
+                                    email: "ag1681@srmist.edu.in",
+                                    mobile: "+91 9042203819"
+                                },
+                                {
+                                    name: "J Aakash",
+                                    regNo: "RA2411003010009",
+                                    email: "ja0735@srmist.edu.in",
+                                    mobile: "+91 9363905541"
+                                },
+                                {
+                                    name: "Akshalin",
+                                    regNo: "RA2411003010052",
+                                    email: "ac9696@srmist.edu.in",
+                                    mobile: "+91 7806951901"
+                                },
+                                {
+                                    name: "Pratheep",
+                                    regNo: "RA2411003010053",
+                                    email: "pr6084@srmist.edu.in",
+                                    mobile: "+91 9500046195"
+                                }
+                            ].map((student, index) => (
+                                <div key={index} className="bg-gray-50 rounded-3xl p-8 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 hover:border-blue-100 group">
+                                    <div className="flex items-center gap-4 mb-5">
+                                        <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold shadow-md group-hover:scale-110 transition-transform duration-300">
+                                            {student.name.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <h4 className="text-xl font-bold text-gray-900">{student.name}</h4>
+                                            <span className="text-xs text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">{student.regNo}</span>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-3 text-gray-600">
+                                            <span className="text-lg">✉️</span>
+                                            <a href={`mailto:${student.email}`} className="hover:text-blue-600 transition-colors text-sm font-medium">{student.email}</a>
+                                        </div>
+                                        <div className="flex items-center gap-3 text-gray-600">
+                                            <span className="text-lg">📱</span>
+                                            <a href={`tel:${student.mobile}`} className="hover:text-blue-600 transition-colors text-sm font-medium">{student.mobile}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* SECTION 8 - Footer */}
+            {/* SECTION 9 - Footer */}
             <footer className="bg-gray-900 text-gray-300 py-20 border-t border-gray-800">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid md:grid-cols-3 gap-12 items-center">
