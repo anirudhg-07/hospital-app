@@ -39,7 +39,10 @@ const BookAppointment = () => {
         const fetchDoctors = async () => {
             try {
                 const res = await api.get("/api/doctors");
-                setDoctors(res.data);
+                const list = Array.isArray(res.data) ? res.data : [];
+                // Safety filter: hide soft-deleted doctors and malformed profiles
+                const cleaned = list.filter((d) => !d?.hidden && d?.userId?.name && d?.userId?.name !== "Unknown");
+                setDoctors(cleaned);
             } catch {
                 setDoctors([]);
             } finally {
