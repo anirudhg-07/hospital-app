@@ -6,7 +6,7 @@ const Doctor = require('../models/Doctor')
 // Get all doctors
 router.get('/', async (req, res) => {
   try {
-    const doctors = await Doctor.find().populate('userId', 'name email')
+  const doctors = await Doctor.find({ hidden: { $ne: true } }).populate('userId', 'name email')
     res.json(doctors)
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong', error })

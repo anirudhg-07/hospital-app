@@ -6,6 +6,11 @@ const doctorSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  hidden: {
+    type: Boolean,
+    default: false,
+    index: true,
+  },
   specialization: {
     type: String,
     required: true
