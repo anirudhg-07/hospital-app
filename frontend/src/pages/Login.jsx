@@ -31,9 +31,13 @@ const Login = () => {
                 navigate("/doctor-dashboard");
             }
         } catch (err) {
-            setErrorMsg(
-                err.response?.data?.message || "Login failed. Please try again."
-            );
+            // Show one generic message for any bad-credential case (wrong email
+            // OR wrong password) so we never reveal which emails are registered.
+            if (err.response?.status === 401 || err.response?.status === 400) {
+                setErrorMsg("Invalid email or password");
+            } else {
+                setErrorMsg("Login failed. Please try again.");
+            }
         }
     };
 

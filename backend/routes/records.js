@@ -53,7 +53,8 @@ router.post('/appointment/:appointmentId', verifyToken, async (req, res) => {
 
     res.status(201).json(record)
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong', error })
+    console.error(error)
+    res.status(500).json({ message: 'Something went wrong' })
   }
 })
 
@@ -83,7 +84,8 @@ router.get('/appointment/:appointmentId', verifyToken, async (req, res) => {
     if (!record) return res.status(404).json({ message: 'Record not found' })
     res.json(record)
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong', error })
+    console.error(error)
+    res.status(500).json({ message: 'Something went wrong' })
   }
 })
 
@@ -107,7 +109,8 @@ router.get('/patient/:patientId', verifyToken, async (req, res) => {
 
     res.json(records)
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong', error })
+    console.error(error)
+    res.status(500).json({ message: 'Something went wrong' })
   }
 })
 

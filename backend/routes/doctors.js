@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const User = require('../models/User')
 const Doctor = require('../models/Doctor')
+const verifyToken = require('../middleware/auth')
 
 // Get all doctors
 router.get('/', async (req, res) => {
@@ -9,19 +10,34 @@ router.get('/', async (req, res) => {
   const doctors = await Doctor.find({ hidden: { $ne: true } }).populate('userId', 'name email')
     res.json(doctors)
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong', error })
+    console.error(error)
+    res.status(500).json({ message: 'Something went wrong' })
   }
 })
 
-// Create doctor profile
-router.post('/create', async (req, res) => {
+// Create doctor profile (doctor-only; profile is tied to the logged-in user)
+router.post('/create', verifyToken, async (req, res) => {
   try {
-    const { userId, specialization, experience, fees } = req.body
+    if (req.user?.role !== 'doctor') {
+      return res.status(403).json({ message: 'Only doctors can create a doctor profile' })
+    }
+
+    // Derive owner from the token, not the request body, so a profile
+    // can only ever be attached to the caller's own account.
+    const userId = req.user.userId
+
+    const existing = await Doctor.findOne({ userId })
+    if (existing) {
+      return res.status(400).json({ message: 'Doctor profile already exists' })
+    }
+
+    const { specialization, experience, fees } = req.body
     const doctor = new Doctor({ userId, specialization, experience, fees })
     await doctor.save()
     res.status(201).json({ message: 'Doctor profile created!', doctor })
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong', error })
+    console.error(error)
+    res.status(500).json({ message: 'Something went wrong' })
   }
 })
 
@@ -33,7 +49,8 @@ router.get('/by-user/:userId', async (req, res) => {
     if (!doctor) return res.status(404).json({ message: 'Doctor profile not found' })
     res.json(doctor)
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong', error })
+    console.error(error)
+    res.status(500).json({ message: 'Something went wrong' })
   }
 })
 
@@ -45,7 +62,8 @@ router.get('/:id', async (req, res) => {
     if (!doctor) return res.status(404).json({ message: 'Doctor not found' })
     res.json(doctor)
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong', error })
+    console.error(error)
+    res.status(500).json({ message: 'Something went wrong' })
   }
 })
 
