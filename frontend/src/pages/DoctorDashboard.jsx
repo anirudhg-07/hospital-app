@@ -346,8 +346,13 @@ const DoctorDashboard = () => {
                                                 <span className="text-white text-lg font-extrabold leading-none">#{appt.tokenNumber}</span>
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-gray-800">
-                                                    {appt.patientId?.name || "Unknown Patient"}
+                                                <p className="font-semibold text-gray-800 flex items-center gap-2">
+                                                    {appt.patientId?.name || appt.patientName || "Unknown Patient"}
+                                                    {appt.source === "walk-in" && (
+                                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-100 text-purple-700">
+                                                            Walk-in
+                                                        </span>
+                                                    )}
                                                 </p>
                                                 <p className="text-xs text-gray-500 mt-0.5">
                                                     ⏰ {appt.timeSlot}
@@ -360,20 +365,25 @@ const DoctorDashboard = () => {
                                             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyle.bg} ${statusStyle.text}`}>
                                                 {statusStyle.label}
                                             </span>
-                                            <button
-                                                onClick={() => openRecordEditor(appt)}
-                                                className="px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-50 transition-all duration-200"
-                                            >
-                                                Add/Edit Record
-                                            </button>
+                                            {/* Records only apply to registered patients, not walk-ins */}
+                                            {appt.source !== "walk-in" && (
+                                                <button
+                                                    onClick={() => openRecordEditor(appt)}
+                                                    className="px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-50 transition-all duration-200"
+                                                >
+                                                    Add/Edit Record
+                                                </button>
+                                            )}
                                             {appt.status === "waiting" && (
                                                 <>
-                                                    <button
-                                                        onClick={() => showPrevRecords(appt)}
-                                                        className="px-3 py-1.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-lg border border-yellow-200 hover:bg-yellow-200 transition-all duration-200 mr-1"
-                                                    >
-                                                        View Previous Records
-                                                    </button>
+                                                    {appt.source !== "walk-in" && (
+                                                        <button
+                                                            onClick={() => showPrevRecords(appt)}
+                                                            className="px-3 py-1.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-lg border border-yellow-200 hover:bg-yellow-200 transition-all duration-200 mr-1"
+                                                        >
+                                                            View Previous Records
+                                                        </button>
+                                                    )}
                                                     <button
                                                         onClick={() => handleStatusUpdate(appt._id, "in-progress")}
                                                         disabled={isUpdating}
@@ -521,7 +531,7 @@ const DoctorDashboard = () => {
                                             <div className="w-8 h-8 bg-green-400 rounded-lg flex items-center justify-center">
                                                 <span className="text-white text-xs font-bold">#{appt.tokenNumber}</span>
                                             </div>
-                                            <span className="text-sm font-medium text-gray-600">{appt.patientId?.name || "Unknown"}</span>
+                                            <span className="text-sm font-medium text-gray-600">{appt.patientId?.name || appt.patientName || "Unknown"}</span>
                                         </div>
                                         <span className="text-xs font-semibold text-green-600">✓ Done</span>
                                     </div>
@@ -536,7 +546,7 @@ const DoctorDashboard = () => {
             {apptDetailsModal.open && apptDetailsModal.appt && (() => {
                 const appt = apptDetailsModal.appt;
                 const statusStyle = STATUS_STYLES[appt.status] || STATUS_STYLES.waiting;
-                const patientName = appt.patientId?.name || "Unknown Patient";
+                const patientName = appt.patientId?.name || appt.patientName || "Unknown Patient";
 
                 return (
                     <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">

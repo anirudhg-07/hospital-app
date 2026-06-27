@@ -201,6 +201,7 @@ const Register = () => {
                                     <option value="">Select Role</option>
                                     <option value="patient">Patient</option>
                                     <option value="doctor">Doctor</option>
+                                    <option value="receptionist">Receptionist</option>
                                 </select>
                                 {/* Custom dropdown arrow */}
                                 <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">

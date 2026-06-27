@@ -29,6 +29,8 @@ const Login = () => {
                 navigate("/patient-dashboard");
             } else if (role === "doctor") {
                 navigate("/doctor-dashboard");
+            } else if (role === "receptionist") {
+                navigate("/receptionist-dashboard");
             }
         } catch (err) {
             // Show one generic message for any bad-credential case (wrong email

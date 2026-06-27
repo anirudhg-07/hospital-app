@@ -27,6 +27,11 @@ router.post('/appointment/:appointmentId', verifyToken, async (req, res) => {
     const appt = await Appointment.findById(appointmentId)
     if (!appt) return res.status(404).json({ message: 'Appointment not found' })
 
+    // Walk-ins have no account, so medical records don't apply to them.
+    if (appt.source === 'walk-in' || !appt.patientId) {
+      return res.status(400).json({ message: 'Medical records are not available for walk-in patients' })
+    }
+
     const ownership = await assertDoctorOwnership(req, appt.doctorId)
     if (!ownership.ok) return res.status(ownership.status).json({ message: ownership.message })
 

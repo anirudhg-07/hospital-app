@@ -81,6 +81,47 @@ router.post('/book', verifyToken, async (req, res) => {
   }
 })
 
+// Add a walk-in patient (receptionist or doctor only). No account is created —
+// the patient just gets a token and joins today's queue, then consults and leaves.
+router.post('/walk-in', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'receptionist' && req.user.role !== 'doctor') {
+      return res.status(403).json({ message: 'Only staff can add walk-in patients' })
+    }
+
+    const { doctorId, patientName, patientPhone, reason } = req.body
+    if (!doctorId || !patientName) {
+      return res.status(400).json({ message: 'Doctor and patient name are required' })
+    }
+
+    // Walk-ins are always for today and share the same token line as online bookings.
+    const date = new Date().toISOString().split('T')[0]
+    const tokenNumber = await getNextToken(doctorId, date)
+
+    const appointment = new Appointment({
+      doctorId,
+      patientName,
+      patientPhone: patientPhone || '',
+      reason: reason || '',
+      date,
+      timeSlot: 'Walk-in',
+      tokenNumber,
+      source: 'walk-in',
+      status: 'waiting',
+    })
+    await appointment.save()
+
+    res.status(201).json({
+      message: 'Walk-in patient added!',
+      appointment,
+      tokenNumber,
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Something went wrong' })
+  }
+})
+
 // Get all appointments for a patient
 router.get('/patient/:patientId', verifyToken, async (req, res) => {
   try {
@@ -103,10 +144,12 @@ router.get('/patient/:patientId', verifyToken, async (req, res) => {
 // Get today's appointments for a doctor
 router.get('/doctor/:doctorId', verifyToken, async (req, res) => {
   try {
-    // Only the doctor who owns this profile can see its patient queue.
-    const ownership = await assertDoctorOwnership(req, req.params.doctorId)
-    if (!ownership.ok) {
-      return res.status(ownership.status).json({ message: ownership.message })
+    // The owning doctor can see their queue; a receptionist can see any queue.
+    if (req.user.role !== 'receptionist') {
+      const ownership = await assertDoctorOwnership(req, req.params.doctorId)
+      if (!ownership.ok) {
+        return res.status(ownership.status).json({ message: ownership.message })
+      }
     }
 
     const today = new Date().toISOString().split('T')[0]
@@ -158,12 +201,12 @@ router.put('/cancel/:id', verifyToken, async (req, res) => {
     const appointment = await Appointment.findById(req.params.id)
     if (!appointment) return res.status(404).json({ message: 'Appointment not found' })
 
-    // The owning patient can cancel their own appointment; the owning doctor can too.
-    const isOwnerPatient =
-      req.user.role === 'patient' &&
-      String(appointment.patientId) === String(req.user.userId)
-
-    let allowed = isOwnerPatient
+    // A receptionist can cancel any appointment; the owning patient can cancel
+    // their own; the owning doctor can cancel ones in their queue.
+    let allowed = req.user.role === 'receptionist'
+    if (!allowed && req.user.role === 'patient') {
+      allowed = String(appointment.patientId) === String(req.user.userId)
+    }
     if (!allowed && req.user.role === 'doctor') {
       const ownership = await assertDoctorOwnership(req, appointment.doctorId)
       allowed = ownership.ok
