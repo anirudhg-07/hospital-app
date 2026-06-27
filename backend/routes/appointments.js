@@ -2,7 +2,35 @@ const express = require('express')
 const router = express.Router()
 const Appointment = require('../models/Appointment')
 const Doctor = require('../models/Doctor')
+const Counter = require('../models/Counter')
 const verifyToken = require('../middleware/auth')
+
+// Hand out the next token for a doctor on a given day.
+// Uses an atomic $inc on a per-(doctor, day) counter so tokens are always
+// unique and monotonic — no race conditions, and numbers are never reused
+// after a cancellation (both bugs the old countDocuments approach had).
+async function getNextToken(doctorId, date) {
+  const key = `${doctorId}_${date}`
+
+  // Seed the counter the first time it's created for this doctor/day, picking
+  // up from any appointments that already exist (e.g. data created before this
+  // counter was introduced). $setOnInsert only applies on initial insert.
+  const lastAppt = await Appointment.findOne({ doctorId, date })
+    .sort({ tokenNumber: -1 })
+    .select('tokenNumber')
+  await Counter.updateOne(
+    { key },
+    { $setOnInsert: { seq: lastAppt ? lastAppt.tokenNumber : 0 } },
+    { upsert: true }
+  )
+
+  const counter = await Counter.findOneAndUpdate(
+    { key },
+    { $inc: { seq: 1 } },
+    { new: true }
+  )
+  return counter.seq
+}
 
 // Helper: ensure the caller is the doctor who owns this Doctor profile.
 // appointment.doctorId stores the Doctor profile _id, so we look it up and
@@ -32,12 +60,8 @@ router.post('/book', verifyToken, async (req, res) => {
       return res.status(400).json({ message: 'This slot is already booked' })
     }
 
-    // generate token number for that day
-    const appointmentsToday = await Appointment.countDocuments({
-      doctorId, date,
-      status: { $ne: 'cancelled' }
-    })
-    const tokenNumber = appointmentsToday + 1
+    // generate a unique token number for that doctor/day (atomic & collision-free)
+    const tokenNumber = await getNextToken(doctorId, date)
 
     // create appointment
     const appointment = new Appointment({
